@@ -49,30 +49,29 @@ public class PixelMatrix {
                 eventCheck(current, x, y);
                 double percentageLoss = 1;
                 switch (current.getEffect()) {
-                    case EMPTY:
-                        percentageLoss = 100d;
-                        break;
-                    case METAL:
-                        percentageLoss = 10d;
-                        break;
-                    case SAND:
+                    case EMPTY -> percentageLoss = 100d;
+                    case METAL -> percentageLoss = 10d;
+                    case SAND -> {
                         step(current, x, y);
                         percentageLoss = 25d;
-                        break;
-                    case WATER:
+                    }
+                    case WATER -> {
                         step(current, x, y);
                         percentageLoss = 25d;
-                        break;
-                    case MOLTEN_METAL:
+                    }
+                    case MOLTEN_METAL -> {
                         step(current, x, y);
                         percentageLoss = 30d;
-                        break;
-                    case STEAM:
+                    }
+                    case MOLTEN_GLASS -> {
+                        step(current, x, y);
+                        percentageLoss = 25d;
+                    }
+                    case STEAM -> {
                         percentageLoss = 15d;
                         step(current, x, y);
-                        break;
-                    case ICE:
-                        percentageLoss = 15d;
+                    }
+                    case ICE -> percentageLoss = 15d;
                 }
                 heatTransfer(current, x, y, percentageLoss);
             }
@@ -148,6 +147,9 @@ public class PixelMatrix {
                     case MOLTEN_METAL:
                         fluidStep(current, x, y);
                         break;
+                    case MOLTEN_GLASS:
+                        fluidStep(current,x,y);
+                        break;
                     case STEAM:
                         if (70 > rand.nextInt(101) && getPixel(x, y - 1).getEffect() != ParticleEffect.METAL) {
                             swap(x, y, x, y - 1);
@@ -196,6 +198,16 @@ public class PixelMatrix {
                     current.setParticleEffect(ParticleEffect.WATER);
                 }
                 break;
+            case GLASS:
+            case SAND:
+                if (current.getTemp() >= 800) {
+                    current.setParticleEffect(ParticleEffect.MOLTEN_GLASS);
+                }
+                break;
+            case MOLTEN_GLASS:
+                if (current.getTemp() <= 800) {
+                    current.setParticleEffect(ParticleEffect.GLASS);
+                }
         }
     }
 
@@ -204,13 +216,8 @@ public class PixelMatrix {
     private Pixel[] updateMovable(Pixel current, int x, int y) {
         Pixel[] adjacent = new Pixel[3]; //left, bottom, right;
         switch (current.getEffect()) {
-            case SAND:
-                if (dim.insideY(y - 1) && getPixel(x, y - 1).getEffect() == ParticleEffect.SAND) {
-                    current.setMoving(false);
-                } else current.setMoving(true);
-                break;
-            case WATER:
-            case MOLTEN_METAL:
+            case SAND -> current.setMoving(!dim.insideY(y - 1) || getPixel(x, y - 1).getEffect() != ParticleEffect.SAND);
+            case WATER, MOLTEN_METAL -> {
                 if (dim.insideX(x - 1)) adjacent[0] = getPixel(x - 1, y);
                 if (dim.insideY(y + 1)) adjacent[1] = getPixel(x, y + 1);
                 if (dim.insideX(x + 1)) adjacent[2] = getPixel(x + 1, y);
@@ -222,6 +229,7 @@ public class PixelMatrix {
                     current.setMoving(false);
                 }
                 return adjacent;
+            }
         }
         current.setMoving(true);
         return adjacent;
@@ -240,6 +248,7 @@ public class PixelMatrix {
                     }
                     break;
                 case WATER:
+                case MOLTEN_GLASS:
                 case MOLTEN_METAL:
                     if (dim.insideY(y + 1)) {
                         if (getPixel(x, y + 1).getEffect() == ParticleEffect.EMPTY) {

@@ -52,15 +52,16 @@ public class Pixel implements Comparable<Pixel> {
 
     public Color getColor() {
         switch (effect) {
-            case EMPTY:
+            case EMPTY -> {
                 int x = (int) Math.abs(temp);
                 if (x > 155) x = 155;
                 if (x < 0) x = 0;
                 if (temp > 0) {
                     return new Color(x, 0, 0);
                 } else {
-                    return new Color(0, x/2, x);
+                    return new Color(0, x / 2, x);
                 }
+            }
         }
 
         return color;
@@ -72,39 +73,35 @@ public class Pixel implements Comparable<Pixel> {
 
     public void setParticleEffect(ParticleEffect n) {
         switch (n) {
-            case HEAT:
-                setTemp(temp + 10);
-                break;
-            case EMPTY:
+            case HEAT -> setTemp(temp + 10);
+            case EMPTY -> {
                 setTemp(0);
                 setColor(Color.BLACK);
-                break;
-            case METAL:
+            }
+            case METAL -> {
                 setTemp(20);
                 setColor(colorIntervall(Color.GRAY, 10));
-                break;
-            case SAND:
+            }
+            case SAND -> {
                 setTemp(20);
                 setColor(colorIntervall(new Color(255, 201, 84), 25));
-                break;
-            case WATER:
+            }
+            case WATER -> {
                 setTemp(20);
                 setColor(colorIntervall(new Color(69, 151, 229), 25));
-                break;
-            case MOLTEN_METAL:
-                setColor(colorIntervall(new Color(255, 128, 31), 55));
-                break;
-            case STEAM:
+            }
+            case MOLTEN_METAL -> setColor(colorIntervall(new Color(255, 128, 31), 55));
+            case STEAM -> {
                 setTemp(150);
                 setColor(colorIntervall(new Color(187, 187, 187), 30));
-                break;
-            case ICE:
+            }
+            case ICE -> {
                 setTemp(-20);
                 setColor(colorIntervall(new Color(151, 210, 255), 15));
-                break;
-            case COOL:
-                setTemp(temp - 10);
-                break;
+            }
+            case COOL -> setTemp(temp - 10);
+            case MOLTEN_GLASS -> setColor(colorIntervall(new Color(255, 70, 0), 15));
+            case GLASS -> setColor(colorIntervall(new Color(94, 94, 94), 5));
         }
         if (n != ParticleEffect.HEAT && n != ParticleEffect.COOL) effect = n;
     }
